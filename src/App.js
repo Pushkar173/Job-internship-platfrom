@@ -4,310 +4,933 @@ import './App.css';
 const API_URL = 'http://localhost:5050/api';
 
 function App() {
+
+  // =========================================================
+  // LOGIN STATE
+  // =========================================================
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
+
+  // =========================================================
+  // APP STATES
+  // =========================================================
+
   const [activeTab, setActiveTab] = useState('home');
+
   const [jobs, setJobs] = useState([]);
+  const [allJobs, setAllJobs] = useState([]);
+
   const [internships, setInternships] = useState([]);
+
   const [matchResults, setMatchResults] = useState([]);
+
   const [loading, setLoading] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState('');
+
   const [formData, setFormData] = useState({
-    name: '', email: '', phone: '', date: '', time: '',
-    field: '', message: '', course: '', year: '', skills: ''
+
+    name: 'Pushkar',
+    email: 'pushkar@gmail.com',
+    phone: '9876543210',
+    date: '',
+    time: '',
+    field: 'Web Development',
+    message: '',
+    course: 'B.Tech',
+    year: '3rd Year',
+    skills: 'Python, React, SQL'
+
   });
+
   const [jobPost, setJobPost] = useState({
-    title: '', company: '', type: 'private', location: '', salary: '', skills: '', description: ''
+
+    title: '',
+    company: '',
+    type: 'private',
+    location: '',
+    salary: '',
+    skills: '',
+    description: ''
+
   });
+
+  // =========================================================
+  // FETCH DATA
+  // =========================================================
 
   useEffect(() => {
-    fetchJobs();
-    fetchInternships();
-  }, []);
+
+    if (isLoggedIn) {
+
+      fetchJobs();
+      fetchInternships();
+
+    }
+
+  }, [isLoggedIn]);
+
+  // =========================================================
+  // LOGIN
+  // =========================================================
+
+  const handleLogin = (e) => {
+
+    e.preventDefault();
+
+    if (
+      loginData.email === 'admin@gmail.com' &&
+      loginData.password === '1234'
+    ) {
+
+      setIsLoggedIn(true);
+
+    } else {
+
+      alert('❌ Invalid Email or Password');
+
+    }
+  };
+
+  // =========================================================
+  // FETCH JOBS
+  // =========================================================
 
   const fetchJobs = async () => {
+
     try {
+
       const response = await fetch(`${API_URL}/jobs`);
       const data = await response.json();
+
       setJobs(data);
+      setAllJobs(data);
+
     } catch (error) {
-      console.error('Error fetching jobs:', error);
+
+      console.error(error);
+
     }
   };
+
+  // =========================================================
+  // FETCH INTERNSHIPS
+  // =========================================================
 
   const fetchInternships = async () => {
+
     try {
+
       const response = await fetch(`${API_URL}/internships`);
       const data = await response.json();
+
       setInternships(data);
+
     } catch (error) {
-      console.error('Error fetching internships:', error);
+
+      console.error(error);
+
     }
   };
 
+  // =========================================================
+  // SEARCH JOBS
+  // =========================================================
+
+  const handleSearch = (value) => {
+
+    setSearchTerm(value);
+
+    if (value.trim() === '') {
+
+      setJobs(allJobs);
+
+    } else {
+
+      const filtered = allJobs.filter((job) =>
+
+        job.title.toLowerCase().includes(value.toLowerCase()) ||
+        job.company.toLowerCase().includes(value.toLowerCase()) ||
+        job.location.toLowerCase().includes(value.toLowerCase())
+
+      );
+
+      setJobs(filtered);
+    }
+  };
+
+  // =========================================================
+  // AI MATCH
+  // =========================================================
+
   const handleAIMatch = async () => {
-    if (!formData.skills) {
-      alert('Please enter your skills in the registration form first!');
-      return;
-    }
-    
+
     setLoading(true);
-    const skillsArray = formData.skills.split(',').map(s => s.trim());
-    
+
+    const skillsArray = formData.skills
+      .split(',')
+      .map(s => s.trim());
+
     try {
+
       const response = await fetch(`${API_URL}/match`, {
+
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ skills: skillsArray })
+
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
+        body: JSON.stringify({
+          skills: skillsArray
+        })
+
       });
+
       const data = await response.json();
+
       setMatchResults(data);
+
       setActiveTab('match');
+
     } catch (error) {
-      console.error('Error:', error);
+
+      console.error(error);
+
     }
+
     setLoading(false);
   };
 
+  // =========================================================
+  // APPLY JOB
+  // =========================================================
+
+  const applyJob = (jobTitle) => {
+
+    alert(`✅ Successfully Applied for ${jobTitle}`);
+  };
+
+  // =========================================================
+  // COUNSELING
+  // =========================================================
+
   const handleCounseling = async (e) => {
+
     e.preventDefault();
+
     try {
+
       const response = await fetch(`${API_URL}/counseling`, {
+
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
         body: JSON.stringify(formData)
+
       });
+
       const data = await response.json();
+
       if (data.success) {
+
         alert('✅ Counseling booked successfully!');
-        setFormData({ ...formData, name: '', email: '', phone: '', date: '', time: '' });
+
       }
+
     } catch (error) {
+
       alert('Error booking counseling');
+
     }
   };
+
+  // =========================================================
+  // MENTORSHIP
+  // =========================================================
 
   const handleMentorship = async (e) => {
+
     e.preventDefault();
+
     try {
+
       const response = await fetch(`${API_URL}/mentorship`, {
+
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
         body: JSON.stringify(formData)
+
       });
+
       const data = await response.json();
+
       if (data.success) {
+
         alert('✅ Mentorship request sent!');
-        setFormData({ ...formData, field: '', message: '' });
+
       }
+
     } catch (error) {
-      alert('Error sending request');
+
+      alert('Error sending mentorship request');
+
     }
   };
+
+  // =========================================================
+  // REGISTER
+  // =========================================================
 
   const handleRegister = async (e) => {
+
     e.preventDefault();
+
     try {
+
       const response = await fetch(`${API_URL}/register`, {
+
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
         body: JSON.stringify(formData)
+
       });
+
       const data = await response.json();
+
       if (data.success) {
-        alert('✅ Registration successful! Try AI Match now.');
+
+        alert('✅ Registration Successful!');
+
       }
+
     } catch (error) {
-      alert('Error registering');
+
+      alert('Registration Error');
+
     }
   };
+
+  // =========================================================
+  // POST JOB
+  // =========================================================
 
   const handlePostJob = async (e) => {
+
     e.preventDefault();
-    const skillsArray = jobPost.skills.split(',').map(s => s.trim());
+
+    const skillsArray = jobPost.skills
+      .split(',')
+      .map(s => s.trim());
+
     try {
+
       const response = await fetch(`${API_URL}/post-job`, {
+
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...jobPost, skills: skillsArray })
+
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
+        body: JSON.stringify({
+
+          ...jobPost,
+          skills: skillsArray
+
+        })
+
       });
+
       const data = await response.json();
+
       if (data.success) {
-        alert('✅ Job posted successfully!');
+
+        alert('✅ Job Posted Successfully!');
+
         fetchJobs();
-        setJobPost({ title: '', company: '', type: 'private', location: '', salary: '', skills: '', description: '' });
+
+        setJobPost({
+
+          title: '',
+          company: '',
+          type: 'private',
+          location: '',
+          salary: '',
+          skills: '',
+          description: ''
+
+        });
+
+        setActiveTab('jobs');
       }
+
     } catch (error) {
+
       alert('Error posting job');
+
     }
   };
 
-  return (
-    <div className="App">
-      <nav className="navbar">
-        <h1 className="logo">🎯 Rajasthan Career Connect</h1>
-        <div className="nav-links">
-          <button onClick={() => setActiveTab('home')}>Home</button>
-          <button onClick={() => { fetchJobs(); setActiveTab('jobs'); }}>Jobs</button>
-          <button onClick={() => { fetchInternships(); setActiveTab('internships'); }}>Internships</button>
-          <button onClick={handleAIMatch}>🤖 AI Match</button>
-          <button onClick={() => setActiveTab('counseling')}>Counseling</button>
-          <button onClick={() => setActiveTab('mentorship')}>Mentorship</button>
-          <button onClick={() => setActiveTab('register')}>Register</button>
-          <button onClick={() => setActiveTab('post-job')}>Post Job</button>
+  // =========================================================
+  // FILTER JOBS
+  // =========================================================
+
+  const filterJobs = (type) => {
+
+    if (type === 'all') {
+
+      setJobs(allJobs);
+
+    } else {
+
+      const filtered = allJobs.filter(
+        j => j.type === type
+      );
+
+      setJobs(filtered);
+    }
+  };
+
+  // =========================================================
+  // LOGIN PAGE
+  // =========================================================
+
+  if (!isLoggedIn) {
+
+    return (
+
+      <div className="App">
+
+        <div className="container">
+
+          <form onSubmit={handleLogin} className="form">
+
+            <h2>🔐 Login</h2>
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={loginData.email}
+              onChange={(e) =>
+                setLoginData({
+                  ...loginData,
+                  email: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={loginData.password}
+              onChange={(e) =>
+                setLoginData({
+                  ...loginData,
+                  password: e.target.value
+                })
+              }
+            />
+
+            <button type="submit">
+              Login
+            </button>
+
+            <br /><br />
+
+            <p style={{ textAlign: 'center' }}>
+              Demo Login:
+              <br />
+              admin@gmail.com
+              <br />
+              Password: 1234
+            </p>
+
+          </form>
+
         </div>
+
+      </div>
+    );
+  }
+
+  // =========================================================
+  // MAIN APP
+  // =========================================================
+
+  return (
+
+    <div className="App">
+
+      <nav className="navbar">
+
+        <h1 className="logo">
+          🎯 Rajasthan Career Connect
+        </h1>
+
+        <div className="nav-links">
+
+          <button onClick={() => setActiveTab('home')}>
+            Home
+          </button>
+
+          <button onClick={() => {
+            fetchJobs();
+            setActiveTab('jobs');
+          }}>
+            Jobs
+          </button>
+
+          <button onClick={() => {
+            fetchInternships();
+            setActiveTab('internships');
+          }}>
+            Internships
+          </button>
+
+          <button onClick={handleAIMatch}>
+            🤖 AI Match
+          </button>
+
+          <button onClick={() => setActiveTab('counseling')}>
+            Counseling
+          </button>
+
+          <button onClick={() => setActiveTab('mentorship')}>
+            Mentorship
+          </button>
+
+          <button onClick={() => setActiveTab('register')}>
+            Register
+          </button>
+
+          <button onClick={() => setActiveTab('post-job')}>
+            Post Job
+          </button>
+
+          <button onClick={() => setIsLoggedIn(false)}>
+            Logout
+          </button>
+
+        </div>
+
       </nav>
 
       <div className="container">
+
+        {/* HOME */}
+
         {activeTab === 'home' && (
+
           <div className="hero">
+
             <h1>Welcome to Career Connect</h1>
-            <p>An Interactive Job and Internship Platform for Technical Education Department, Govt. of Rajasthan</p>
+
+            <p>
+              AI Powered Job & Internship Portal
+            </p>
+
             <div className="stats">
+
               <div className="stat-card">
                 <h3>{jobs.length}</h3>
-                <p>Active Jobs</p>
+                <p>Jobs</p>
               </div>
+
               <div className="stat-card">
                 <h3>{internships.length}</h3>
                 <p>Internships</p>
               </div>
+
               <div className="stat-card">
                 <h3>24/7</h3>
-                <p>Support Available</p>
+                <p>Support</p>
               </div>
+
             </div>
+
           </div>
         )}
+
+        {/* JOBS */}
 
         {activeTab === 'jobs' && (
-          <div className="jobs-section">
-            <h2>Available Jobs</h2>
+
+          <div>
+
+            <h2 style={{ color: 'white' }}>
+              Available Jobs
+            </h2>
+
+            <br />
+
+            <input
+              type="text"
+              placeholder="🔍 Search jobs..."
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="form"
+            />
+
+            <br /><br />
+
             <div className="filters">
-              <button onClick={() => setJobs([...jobs])}>All</button>
-              <button onClick={() => setJobs(jobs.filter(j => j.type === 'private'))}>Private</button>
-              <button onClick={() => setJobs(jobs.filter(j => j.type === 'government'))}>Government</button>
-              <button onClick={() => setJobs(jobs.filter(j => j.type === 'overseas'))}>Overseas</button>
+
+              <button onClick={() => filterJobs('all')}>
+                All
+              </button>
+
+              <button onClick={() => filterJobs('private')}>
+                Private
+              </button>
+
+              <button onClick={() => filterJobs('government')}>
+                Government
+              </button>
+
+              <button onClick={() => filterJobs('overseas')}>
+                Overseas
+              </button>
+
             </div>
+
             <div className="job-grid">
+
               {jobs.map(job => (
+
                 <div key={job.id} className="job-card">
+
                   <h3>{job.title}</h3>
+
                   <p className="company">{job.company}</p>
+
                   <p>📍 {job.location}</p>
+
                   <p>💰 {job.salary}</p>
-                  <p>🎯 Skills: {job.skills?.join(', ')}</p>
-                  <span className={`job-type ${job.type}`}>{job.type}</span>
+
+                  <p>
+                    🎯 {job.skills?.join(', ')}
+                  </p>
+
+                  <br />
+
+                  <button
+                    onClick={() => applyJob(job.title)}
+                  >
+                    Apply Now
+                  </button>
+
                 </div>
               ))}
             </div>
+
           </div>
         )}
+
+        {/* INTERNSHIPS */}
 
         {activeTab === 'internships' && (
-          <div className="internships-section">
-            <h2>Internship Opportunities</h2>
+
+          <div>
+
+            <h2 style={{ color: 'white' }}>
+              Internship Opportunities
+            </h2>
+
             <div className="internship-grid">
+
               {internships.map(intern => (
+
                 <div key={intern.id} className="internship-card">
+
                   <h3>{intern.title}</h3>
-                  <p className="company">{intern.company}</p>
+
+                  <p className="company">
+                    {intern.company}
+                  </p>
+
                   <p>⏱️ {intern.duration}</p>
-                  <p>💰 Stipend: ₹{intern.stipend}</p>
+
+                  <p>💰 {intern.stipend}</p>
+
                   <p>📍 {intern.location}</p>
-                  <p>🎯 Skills: {intern.skills?.join(', ')}</p>
+
+                  <p>
+                    🎯 {intern.skills?.join(', ')}
+                  </p>
+
                 </div>
               ))}
             </div>
+
           </div>
         )}
 
+        {/* AI MATCH */}
+
         {activeTab === 'match' && (
+
           <div className="match-section">
-            <h2>🤖 AI Job Match Results</h2>
-            {loading ? <p>Analyzing your skills...</p> : (
-              matchResults.length > 0 ? (
-                matchResults.map(result => (
-                  <div key={result.job_id} className="match-card">
-                    <div className="match-info">
-                      <h3>{result.title}</h3>
-                      <p>{result.company}</p>
-                    </div>
-                    <div className="match-percentage">
-                      <div className="percentage-bar" style={{ width: `${result.match_percentage}%` }}>
-                        {result.match_percentage}%
-                      </div>
-                    </div>
+
+            <h2>🤖 AI Match Results</h2>
+
+            {loading ? (
+
+              <p>Analyzing...</p>
+
+            ) : (
+
+              matchResults.map(result => (
+
+                <div
+                  key={result.job_id}
+                  className="match-card"
+                >
+
+                  <div>
+
+                    <h3>{result.title}</h3>
+
+                    <p>{result.company}</p>
+
                   </div>
-                ))
-              ) : (
-                <p>Go to Register tab first and add your skills, then click AI Match!</p>
-              )
+
+                  <h2>
+                    {result.match_percentage}%
+                  </h2>
+
+                </div>
+              ))
             )}
           </div>
         )}
 
+        {/* COUNSELING */}
+
         {activeTab === 'counseling' && (
+
           <form onSubmit={handleCounseling} className="form">
-            <h2>Book Career Counseling</h2>
-            <input type="text" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
-            <input type="email" placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
-            <input type="tel" placeholder="Phone" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} required />
-            <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} required />
-            <input type="time" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} required />
-            <button type="submit">Book Session</button>
+
+            <h2>Career Counseling</h2>
+
+            <input
+              type="text"
+              placeholder="Name"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  name: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="date"
+              value={formData.date}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  date: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="time"
+              value={formData.time}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  time: e.target.value
+                })
+              }
+            />
+
+            <button type="submit">
+              Book Session
+            </button>
+
           </form>
         )}
+
+        {/* MENTORSHIP */}
 
         {activeTab === 'mentorship' && (
+
           <form onSubmit={handleMentorship} className="form">
-            <h2>Request Mentorship</h2>
-            <input type="text" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
-            <input type="email" placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
-            <select value={formData.field} onChange={e => setFormData({...formData, field: e.target.value})} required>
-              <option value="">Select Field</option>
-              <option>Web Development</option>
-              <option>Data Science</option>
-              <option>Cloud Computing</option>
-              <option>Cybersecurity</option>
-            </select>
-            <textarea placeholder="Your message..." value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} rows="4"></textarea>
-            <button type="submit">Request Mentor</button>
+
+            <h2>AI Mentorship</h2>
+
+            <textarea
+              placeholder="Enter your message"
+              value={formData.message}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  message: e.target.value
+                })
+              }
+            />
+
+            <button type="submit">
+              Request Mentor
+            </button>
+
           </form>
         )}
+
+        {/* REGISTER */}
 
         {activeTab === 'register' && (
+
           <form onSubmit={handleRegister} className="form">
+
             <h2>Student Registration</h2>
-            <input type="text" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
-            <input type="email" placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
-            <input type="text" placeholder="Course" value={formData.course} onChange={e => setFormData({...formData, course: e.target.value})} required />
-            <select value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} required>
-              <option value="">Select Year</option>
-              <option>1st Year</option>
-              <option>2nd Year</option>
-              <option>3rd Year</option>
-              <option>4th Year</option>
-            </select>
-            <textarea placeholder="Skills (comma separated, e.g., Python, React, SQL)" value={formData.skills} onChange={e => setFormData({...formData, skills: e.target.value})} rows="3" required></textarea>
-            <button type="submit">Register</button>
+
+            <input
+              type="text"
+              placeholder="Name"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  name: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  email: e.target.value
+                })
+              }
+            />
+
+            <textarea
+              placeholder="Skills"
+              value={formData.skills}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  skills: e.target.value
+                })
+              }
+            />
+
+            <button type="submit">
+              Register
+            </button>
+
           </form>
         )}
 
+        {/* POST JOB */}
+
         {activeTab === 'post-job' && (
+
           <form onSubmit={handlePostJob} className="form">
-            <h2>Post a New Job</h2>
-            <input type="text" placeholder="Job Title" value={jobPost.title} onChange={e => setJobPost({...jobPost, title: e.target.value})} required />
-            <input type="text" placeholder="Company Name" value={jobPost.company} onChange={e => setJobPost({...jobPost, company: e.target.value})} required />
-            <select value={jobPost.type} onChange={e => setJobPost({...jobPost, type: e.target.value})}>
-              <option value="private">Private</option>
-              <option value="government">Government</option>
-              <option value="overseas">Overseas</option>
-            </select>
-            <input type="text" placeholder="Location" value={jobPost.location} onChange={e => setJobPost({...jobPost, location: e.target.value})} required />
-            <input type="text" placeholder="Salary" value={jobPost.salary} onChange={e => setJobPost({...jobPost, salary: e.target.value})} required />
-            <textarea placeholder="Required Skills (comma separated)" value={jobPost.skills} onChange={e => setJobPost({...jobPost, skills: e.target.value})} rows="2" required></textarea>
-            <textarea placeholder="Job Description" value={jobPost.description} onChange={e => setJobPost({...jobPost, description: e.target.value})} rows="3" required></textarea>
-            <button type="submit">Post Job</button>
+
+            <h2>Post New Job</h2>
+
+            <input
+              type="text"
+              placeholder="Job Title"
+              value={jobPost.title}
+              onChange={(e) =>
+                setJobPost({
+                  ...jobPost,
+                  title: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Company"
+              value={jobPost.company}
+              onChange={(e) =>
+                setJobPost({
+                  ...jobPost,
+                  company: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Location"
+              value={jobPost.location}
+              onChange={(e) =>
+                setJobPost({
+                  ...jobPost,
+                  location: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Salary"
+              value={jobPost.salary}
+              onChange={(e) =>
+                setJobPost({
+                  ...jobPost,
+                  salary: e.target.value
+                })
+              }
+            />
+
+            <textarea
+              placeholder="Skills"
+              value={jobPost.skills}
+              onChange={(e) =>
+                setJobPost({
+                  ...jobPost,
+                  skills: e.target.value
+                })
+              }
+            />
+
+            <textarea
+              placeholder="Description"
+              value={jobPost.description}
+              onChange={(e) =>
+                setJobPost({
+                  ...jobPost,
+                  description: e.target.value
+                })
+              }
+            />
+
+            <button type="submit">
+              Post Job
+            </button>
+
           </form>
         )}
+
       </div>
     </div>
   );

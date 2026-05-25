@@ -266,3 +266,130 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* LOGIN PAGE */
+
+.login-page{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#4f46e5,#7c3aed);
+}
+
+.login-box{
+  background:white;
+  padding:40px;
+  width:350px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  text-align:center;
+}
+
+.login-box h1{
+  color:#4f46e5;
+  margin-bottom:10px;
+}
+
+.login-box p{
+  margin-bottom:20px;
+  color:#666;
+}
+
+.login-box input{
+  width:100%;
+  padding:12px;
+  margin-bottom:15px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  outline:none;
+}
+
+.login-box button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#4f46e5;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.login-box button:hover{
+  background:#4338ca;
+}
+
+/* SEARCH BAR */
+
+.search-bar{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  margin:20px 0;
+  font-size:16px;
+  outline:none;
+}
+
+/* APPLY BUTTON */
+
+.apply-btn{
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#4f46e5,#7c3aed);
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+  transition:0.3s;
+}
+
+.apply-btn:hover{
+  transform:translateY(-3px);
+}
+
+/* SECTION TITLE */
+
+.section-title{
+  color:white;
+  margin-bottom:10px;
+  font-size:32px;
+}
+
+/* BETTER NAVBAR */
+
+.navbar{
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
+
+/* MATCH PERCENTAGE */
+
+.percentage{
+  background:#4f46e5;
+  color:white;
+  padding:10px 20px;
+  border-radius:10px;
+  font-weight:bold;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+  .nav-links{
+    justify-content:center;
+  }
+
+  .job-grid{
+    grid-template-columns:1fr;
+  }
+
+  .stats{
+    grid-template-columns:1fr;
+  }
+}
